@@ -15,7 +15,7 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@symph-core-sdk-v2/logger": ["logger/src/index.ts"]
+      "@symphco/logger": ["logger/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]
