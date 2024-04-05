@@ -1,0 +1,14 @@
+{
+  "name": "@symph-core-sdk-v2/logger",
+  "version": "0.0.1",
+  "dependencies": {
+    "tslib": "^2.3.0",
+    "@google-cloud/logging-winston": "^6.0.0",
+    "dayjs": "^1.11.10",
+    "express": "^4.19.2",
+    "winston": "^3.13.0"
+  },
+  "type": "commonjs",
+  "main": "./src/index.js",
+  "typings": "./src/index.d.ts"
+}
