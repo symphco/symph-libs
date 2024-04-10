@@ -16,7 +16,7 @@ import { LoggerService, centralizedLoggerMiddleware } from '@symphco/logger';
 export class AppModule {
     async configure(consumer: MiddlewareConsumer) {
         consumer.apply(
-            await LoggerService.generateMiddleware(false),
+            await LoggerService.generateMiddleware(process.env.NODE_ENV !== 'development',),
             centralizedLoggerMiddleware
         ).forRoutes('*');
     }
