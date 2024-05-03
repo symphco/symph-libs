@@ -6,10 +6,8 @@
   "private": true,
   "dependencies": {
     "@google-cloud/logging-winston": "^6.0.0",
-    "@nestjs/common": "^10.3.8",
     "dayjs": "^1.11.10",
     "express": "^4.19.2",
-    "rxjs": "^7.8.1",
     "tslib": "^2.3.0",
     "winston": "^3.13.0"
   },
