@@ -1,20 +1,48 @@
 import { NextFunction, Request, Response } from 'express';
-
 import { LoggerService } from '../services/logger.service';
 
 const loggerService = new LoggerService();
+
+function captureResponseBody(res: Response, callback: (body: any) => void) {
+  let responseBody: any;
+  const { write, end } = res;
+
+  res.write = (...args: any[]) => {
+    responseBody = args[0];
+    write.apply(res, args);
+  };
+
+  res.end = (...args: any[]) => {
+    if (args[0]) responseBody = args[0];
+    end.apply(res, args);
+  };
+
+  res.on('finish', () => callback(responseBody));
+}
 
 export function apiLoggingMiddleware(
   req: Request,
   res: Response,
   next: NextFunction
 ) {
-  const payload = req.body;
+  loggerService.info('Request:', {
+    method: req.method,
+    path: req.path,
+    headers: req.headers,
+    payload: req.body,
+  });
 
-  loggerService.info('Payload: ', payload);
+  captureResponseBody(res, (responseBody) => {
+    loggerService.info('Response:', {
+      statusCode: res.statusCode,
+      statusMessage: res.statusMessage,
+      headers: res.getHeaders(),
+      body: responseBody?.toString(),
+    });
+  });
 
-  res.on('finish', () => {
-    //
+  res.on('error', (err: any) => {
+    loggerService.error('Error:', err);
   });
 
   next();
