@@ -25,7 +25,7 @@ export function apiLoggingMiddleware(
   res: Response,
   next: NextFunction
 ) {
-  loggerService.info('Request:', {
+  loggerService.info('[REQUEST]', {
     method: req.method,
     path: req.path,
     headers: req.headers,
@@ -33,7 +33,7 @@ export function apiLoggingMiddleware(
   });
 
   captureResponseBody(res, (responseBody) => {
-    loggerService.info('Response:', {
+    loggerService.info('[RESPONSE]', {
       statusCode: res.statusCode,
       statusMessage: res.statusMessage,
       headers: res.getHeaders(),
@@ -42,7 +42,11 @@ export function apiLoggingMiddleware(
   });
 
   res.on('error', (err: any) => {
-    loggerService.error('Error:', err);
+    loggerService.error('[ERROR]', {
+      message: err.message,
+      stack: err.stack,
+      statusCode: res.statusCode,
+    });
   });
 
   next();
