@@ -8,13 +8,15 @@ function captureResponseBody(res: Response, callback: (body: any) => void) {
   const { write, end } = res;
 
   res.write = (...args: any[]) => {
-    responseBody = args[0];
-    write.apply(res, args);
+    const [chunk = null, encoding = 'utf8', cb] = args;
+    responseBody = chunk;
+    return write.apply(res, [chunk, encoding, cb]);
   };
 
   res.end = (...args: any[]) => {
-    if (args[0]) responseBody = args[0];
-    end.apply(res, args);
+    const [chunk = null, encoding = 'utf8', cb] = args;
+    if (chunk) responseBody = chunk;
+    return end.apply(res, [chunk, encoding, cb]);
   };
 
   res.on('finish', () => callback(responseBody));
