@@ -37,7 +37,7 @@ export function apiLoggingMiddleware(
   };
 
   const sensitiveValues = findSensitiveValues(request);
-  console.log(sensitiveValues);
+
   if (sensitiveValues.length > 0) {
     loggerService.info('[REQUEST]', scrub(request, sensitiveValues));
   } else {
