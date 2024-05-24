@@ -52,7 +52,6 @@ export function apiLoggingMiddleware(
     };
 
     const sensitiveValues = findSensitiveValues(response);
-    console.log(sensitiveValues);
 
     if (sensitiveValues.length) {
       loggerService.info('[RESPONSE]', scrub(response, sensitiveValues));
