@@ -1,4 +1,6 @@
+import { scrub, findSensitiveValues } from '@zapier/secret-scrubber';
 import { NextFunction, Request, Response } from 'express';
+
 import { LoggerService } from '../services/logger.service';
 
 const loggerService = new LoggerService();
@@ -27,20 +29,35 @@ export function apiLoggingMiddleware(
   res: Response,
   next: NextFunction
 ) {
-  loggerService.info('[REQUEST]', {
+  const request = {
     method: req.method,
     path: req.path,
     headers: req.headers,
     payload: req.body,
-  });
+  };
 
-  captureResponseBody(res, (responseBody) => {
-    loggerService.info('[RESPONSE]', {
+  const sensitiveValues = findSensitiveValues(request);
+  if (sensitiveValues.length > 0) {
+    loggerService.info('[REQUEST]', scrub(request, sensitiveValues));
+  } else {
+    loggerService.info('[REQUEST]', request);
+  }
+
+  captureResponseBody(res, (responseBody = {}) => {
+    const response = {
       statusCode: res.statusCode,
       statusMessage: res.statusMessage,
       headers: res.getHeaders(),
       body: responseBody?.toString(),
-    });
+    };
+
+    const sensitiveValues = findSensitiveValues(response);
+
+    if (sensitiveValues.length) {
+      loggerService.info('[RESPONSE]', scrub(response, sensitiveValues));
+    } else {
+      loggerService.info('[RESPONSE]', response);
+    }
   });
 
   res.on('error', (err: any) => {
