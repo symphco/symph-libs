@@ -7,8 +7,9 @@ import {
 import { NextFunction, Request, Response } from 'express';
 
 import { LoggerService } from '../services/logger.service';
+import { LogAndScrubType } from '../type/logger';
 
-const loggerService = new LoggerService();
+let loggerService: LoggerService;
 
 function captureResponseBody(res: Response, callback: (body: any) => void) {
   let responseBody: any;
@@ -29,7 +30,12 @@ function captureResponseBody(res: Response, callback: (body: any) => void) {
   res.on('finish', () => callback(responseBody));
 }
 
-export function apiLoggingMiddleware(sensitiveKeys: string[]) {
+export function apiLoggingMiddleware(
+  sensitiveKeys: string[],
+  _loggerService = new LoggerService()
+) {
+  loggerService = _loggerService;
+
   return (req: Request, res: Response, next: NextFunction) => {
     const request = {
       method: req.method,
