@@ -1,9 +1,12 @@
-import { scrub, findSensitiveValues } from '@zapier/secret-scrubber';
+import {
+  scrub,
+  findSensitiveValues,
+  recurseExtract,
+} from '@zapier/secret-scrubber';
 
 import { NextFunction, Request, Response } from 'express';
 
 import { LoggerService } from '../services/logger.service';
-import { recurseExtract } from '@zapier/secret-scrubber/lib/utils';
 
 const loggerService = new LoggerService();
 
