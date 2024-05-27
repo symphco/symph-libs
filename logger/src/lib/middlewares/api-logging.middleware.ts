@@ -30,7 +30,7 @@ function captureResponseBody(res: Response, callback: (body: any) => void) {
   res.on('finish', () => callback(responseBody));
 }
 
-export function apiLoggingMiddleware(
+export function logRequestAndResponseMiddleware(
   sensitiveKeys: string[],
   _loggerService = new LoggerService()
 ) {
