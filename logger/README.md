@@ -44,4 +44,51 @@ For info:
 
 `this.loggerService.info('getFindRequestsQuery', params, user);`
 
+### Logging API Request and Response in all Endpoints
 
+To log all API requests and responses, follow these steps:
+
+1. Import the `logRequestAndResponseMiddleware` in your `app.module.ts` file:
+```
+import { logRequestAndResponseMiddleware } from '@symphco/logger;
+```
+
+2. Apply the middleware in the `AppModule` class:
+```
+    consumer.apply(
+      await LoggerService.generateMiddleware(process.env.NODE_ENV !== 'development',),
+      centralizedLoggerMiddleware,
+      logRequestAndResponseMiddleware([])
+  ).forRoutes('*');
+``` 
+
+This will log all requests and responses for every API endpoint.
+
+3. By default, sensitive information is scrubbed from the logs. However, if you want to explicitly hide additional information based on custom keys, include those keys when instantiating `logRequestAndResponseMiddleware`. For example, to hide 'passcode' from the logs:
+
+In the app.module.ts file:
+
+```
+  consumer.apply(
+    await LoggerService.generateMiddleware(process.env.NODE_ENV !== 'development'),
+    centralizedLoggerMiddleware,
+    logRequestAndResponseMiddleware(['passcode'])
+  ).forRoutes('');
+```
+
+For example, a logged request to `api/v1/verify` would look like this:
+
+```  
+  `api/v1/verify`
+
+  [REQUEST] {
+    method: 'POST',
+    url: '/',
+    headers: {
+      ...
+    },
+    body: {
+      passcode: 'censored:263:131f400d91:'
+    }
+  }
+```
