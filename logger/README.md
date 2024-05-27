@@ -66,7 +66,7 @@ This will log all requests and responses for every API endpoint.
 
 3. By default, sensitive information is scrubbed from the logs. However, if you want to explicitly hide additional information based on custom keys, include those keys when instantiating `logRequestAndResponseMiddleware`. For example, to hide 'passcode' from the logs:
 
-In the app.module.ts file:
+In the `AppModule` class:
 
 ```
   consumer.apply(
