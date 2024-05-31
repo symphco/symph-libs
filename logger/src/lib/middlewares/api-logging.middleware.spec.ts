@@ -1,12 +1,9 @@
-Here's the improved unit test file content based on the guidelines provided:
-
 typescript
 import { scrub, findSensitiveValues } from '@zapier/secret-scrubber';
 import { Request, Response, NextFunction } from 'express';
 import { LoggerService } from '../services/logger.service';
 import { apiLoggingMiddleware } from '../middlewares/apiLoggingMiddleware';
 
-// Mocking dependencies
 jest.mock('@zapier/secret-scrubber');
 jest.mock('../services/logger.service');
 
@@ -40,7 +37,6 @@ beforeEach(() => {
 describe('apiLoggingMiddleware', () => {
   it('should log request without sensitive values', () => {
     (findSensitiveValues as jest.Mock).mockReturnValue([]);
-
     apiLoggingMiddleware(req as Request, res as Response, next);
 
     expect(loggerService.info).toHaveBeenCalledWith('[REQUEST]', {
@@ -54,8 +50,8 @@ describe('apiLoggingMiddleware', () => {
 
   it('should log response without sensitive values', () => {
     (findSensitiveValues as jest.Mock).mockReturnValue([]);
-
     apiLoggingMiddleware(req as Request, res as Response, next);
+
     const responseBodyCallback = (res.on as jest.Mock).mock.calls[0][1];
     responseBodyCallback();
 
@@ -115,9 +111,28 @@ describe('apiLoggingMiddleware', () => {
       statusCode: 200,
     });
   });
+
+  it('should log response with updated headers', () => {
+    (findSensitiveValues as jest.Mock).mockReturnValue([]);
+    res.getHeaders = jest.fn().mockReturnValue({ 'content-type': 'application/json' });
+
+    apiLoggingMiddleware(req as Request, res as Response, next);
+    const responseBodyCallback = (res.on as jest.Mock).mock.calls[0][1];
+    responseBodyCallback();
+
+    expect(loggerService.info).toHaveBeenCalledWith('[RESPONSE]', {
+      statusCode: 200,
+      statusMessage: 'OK',
+      headers: { 'content-type': 'application/json' },
+      body: undefined,
+    });
+  });
+
+  it('should call next middleware after logging request and response', () => {
+    (findSensitiveValues as jest.Mock).mockReturnValue([]);
+
+    apiLoggingMiddleware(req as Request, res as Response, next);
+
+    expect(next).toHaveBeenCalled();
+  });
 });
-
-
-This code uses the given guidance to improve clarity and readability. Each test case is focused on a single responsibility, follows the setup defined in beforeEach, and avoids redundant code. 
-
-The `describe` block clearly groups the tests for the `apiLoggingMiddleware`, and each `it` block describes a specific behavior being tested. This organization makes the tests easier to understand and maintain.
