@@ -117,6 +117,7 @@ describe('apiLoggingMiddleware', () => {
     res.getHeaders = jest.fn().mockReturnValue({ 'content-type': 'application/json' });
 
     apiLoggingMiddleware(req as Request, res as Response, next);
+
     const responseBodyCallback = (res.on as jest.Mock).mock.calls[0][1];
     responseBodyCallback();
 
@@ -128,6 +129,26 @@ describe('apiLoggingMiddleware', () => {
     });
   });
 
+  it('should define log request method', () => {
+    expect(loggerService.info).toBeDefined();
+  });
+
+  it('should define log response method', () => {
+    expect(loggerService.info).toBeDefined();
+  });
+
+  it('should define log error method', () => {
+    expect(loggerService.error).toBeDefined();
+  });
+
+  it('should define scrub function from secret-scrubber', () => {
+    expect(scrub).toBeDefined();
+  });
+
+  it('should define findSensitiveValues function from secret-scrubber', () => {
+    expect(findSensitiveValues).toBeDefined();
+  });
+
   it('should call next middleware after logging request and response', () => {
     (findSensitiveValues as jest.Mock).mockReturnValue([]);
 
@@ -136,23 +157,53 @@ describe('apiLoggingMiddleware', () => {
     expect(next).toHaveBeenCalled();
   });
 
-  it('should log request defined', () => {
-    expect(loggerService.info).toBeDefined();
+  it('should capture complete response body', ()  => {
+    const responseBody = 'This is a response';
+    apiLoggingMiddleware(req as Request, res as Response, next);
+
+    const responseBodyCallback = (res.on as jest.Mock).mock.calls[0][1];
+    res.write(responseBody);
+    res.end();
+
+    responseBodyCallback();
+
+    expect(loggerService.info).toHaveBeenCalledWith('[RESPONSE]', {
+      statusCode: 200,
+      statusMessage: 'OK',
+      headers: {},
+      body: responseBody,
+    });
   });
 
-  it('should log response defined', () => {
-    expect(loggerService.info).toBeDefined();
+  it('should handle empty request body gracefully', () => {
+    req.body = {};
+    apiLoggingMiddleware(req as Request, res as Response, next);
+
+    expect(loggerService.info).toHaveBeenCalledWith('[REQUEST]', {
+      method: 'GET',
+      path: '/test',
+      headers: {},
+      payload: {},
+    });
+
+    expect(next).toHaveBeenCalled();
   });
 
-  it('should log error defined', () => {
-    expect(loggerService.error).toBeDefined();
-  });
+  it('should handle non-JSON response body', () => {
+    const responseBody = '<html>response</html>';
+    apiLoggingMiddleware(req as Request, res as Response, next);
 
-  it('should scrub function from secret-scrubber be defined', () => {
-    expect(scrub).toBeDefined();
-  });
+    const responseBodyCallback = (res.on as jest.Mock).mock.calls[0][1];
+    res.write(responseBody);
+    res.end();
 
-  it('should findSensitiveValues function from secret-scrubber be defined', () => {
-    expect(findSensitiveValues).toBeDefined();
+    responseBodyCallback();
+
+    expect(loggerService.info).toHaveBeenCalledWith('[RESPONSE]', {
+      statusCode: 200,
+      statusMessage: 'OK',
+      headers: {},
+      body: responseBody,
+    });
   });
 });
