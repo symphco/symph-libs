@@ -135,4 +135,24 @@ describe('apiLoggingMiddleware', () => {
 
     expect(next).toHaveBeenCalled();
   });
+
+  it('should log request defined', () => {
+    expect(loggerService.info).toBeDefined();
+  });
+
+  it('should log response defined', () => {
+    expect(loggerService.info).toBeDefined();
+  });
+
+  it('should log error defined', () => {
+    expect(loggerService.error).toBeDefined();
+  });
+
+  it('should scrub function from secret-scrubber be defined', () => {
+    expect(scrub).toBeDefined();
+  });
+
+  it('should findSensitiveValues function from secret-scrubber be defined', () => {
+    expect(findSensitiveValues).toBeDefined();
+  });
 });
