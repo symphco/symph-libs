@@ -38,7 +38,20 @@ describe('apiLoggingMiddleware', () => {
   });
 
   describe('request logging', () => {
-    it('logs request without sensitive values and calls next middleware', () => {
+    it('logs request without sensitive values', () => {
+      apiLoggingMiddleware(req as Request, res as Response, next);
+
+      expect(loggerService.info).toHaveBeenCalledWith('[REQUEST]', {
+        method: req.method,
+        path: req.path,
+        headers: req.headers,
+        payload: req.body
+      });
+      expect(next).toHaveBeenCalled();
+    });
+
+    it('logs request with empty body', () => {
+      req.body = {};
       apiLoggingMiddleware(req as Request, res as Response, next);
 
       expect(loggerService.info).toHaveBeenCalledWith('[REQUEST]', {
@@ -65,18 +78,6 @@ describe('apiLoggingMiddleware', () => {
       });
       expect(next).toHaveBeenCalled();
     });
-
-    it('logs request with empty body', () => {
-      apiLoggingMiddleware(req as Request, res as Response, next);
-
-      expect(loggerService.info).toHaveBeenCalledWith('[REQUEST]', {
-        method: req.method,
-        path: req.path,
-        headers: req.headers,
-        payload: req.body
-      });
-      expect(next).toHaveBeenCalled();
-    });
   });
 
   describe('response logging', () => {
@@ -96,10 +97,21 @@ describe('apiLoggingMiddleware', () => {
       });
     });
 
+    it('logs response with updated headers', () => {
+      res.getHeaders.mockReturnValue({ 'content-type': 'application/json' });
+
+      finishCallback();
+
+      expect(loggerService.info).toHaveBeenCalledWith('[RESPONSE]', {
+        statusCode: res.statusCode,
+        headers: { 'content-type': 'application/json' }
+      });
+    });
+
     it('logs response body written using res.write', () => {
       const responseChunk = 'This is a response';
-
       res.write(responseChunk);
+
       finishCallback();
 
       expect(loggerService.info).toHaveBeenCalledWith('[RESPONSE]', {
@@ -111,8 +123,8 @@ describe('apiLoggingMiddleware', () => {
 
     it('handles and logs non-JSON response body', () => {
       const responseBody = '<html>response</html>';
-
       res.write(responseBody);
+
       finishCallback();
 
       expect(loggerService.info).toHaveBeenCalledWith('[RESPONSE]', {
@@ -125,8 +137,8 @@ describe('apiLoggingMiddleware', () => {
     it('scrubs and logs response with sensitive values', () => {
       findSensitiveValues.mockReturnValue(['password']);
       const responseSecret = '{"password":"responseSecret"}';
-
       res.write(responseSecret);
+
       finishCallback();
 
       expect(scrub).toHaveBeenCalledWith(responseSecret, ['password']);
@@ -134,17 +146,6 @@ describe('apiLoggingMiddleware', () => {
         statusCode: res.statusCode,
         headers: res.getHeaders(),
         body: '{"password":"******"}'
-      });
-    });
-
-    it('logs response with updated headers', () => {
-      res.getHeaders.mockReturnValue({ 'content-type': 'application/json' });
-
-      finishCallback();
-
-      expect(loggerService.info).toHaveBeenCalledWith('[RESPONSE]', {
-        statusCode: res.statusCode,
-        headers: { 'content-type': 'application/json' }
       });
     });
   });
@@ -185,7 +186,6 @@ describe('apiLoggingMiddleware', () => {
 
     it('captures body written using res.write', () => {
       const responseChunk = 'response chunk';
-
       res.write(responseChunk);
 
       expect(capturedBody).toBe(responseChunk);
@@ -193,7 +193,6 @@ describe('apiLoggingMiddleware', () => {
 
     it('captures body written using res.end', () => {
       const responseEnd = 'response end';
-
       res.end(responseEnd);
 
       expect(capturedBody).toBe(responseEnd);
@@ -222,8 +221,8 @@ describe('apiLoggingMiddleware', () => {
 
     it('calls callback on response finish', () => {
       const responseEnd = 'response end';
-
       res.write(responseEnd);
+
       finishCallback();
 
       expect(capturedBody).toBe(responseEnd);
