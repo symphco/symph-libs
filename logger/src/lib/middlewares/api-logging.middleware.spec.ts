@@ -12,21 +12,25 @@ describe('apiLoggingMiddleware', () => {
   let res: Partial<Response>;
   let next: NextFunction;
   let loggerService: LoggerService;
-  let finishCallback: () => void;
-  let errorCallback: (err: any) => void;
 
-  beforeEach(() => {
-    req = { method: 'GET', path: '/test', headers: {}, body: {} };
-    res = {
+  const initializeMockResponse = () => {
+    const res: Partial<Response> = {
       write: jest.fn(),
       end: jest.fn(),
       on: jest.fn(),
       getHeaders: jest.fn().mockReturnValue({}),
       statusCode: 200,
-      statusMessage: 'OK',
+      statusMessage: 'OK'
     };
+    return res;
+  };
+
+  beforeEach(() => {
+    req = { method: 'GET', path: '/test', headers: {}, body: {} };
+    res = initializeMockResponse();
     next = jest.fn();
     loggerService = new LoggerService();
+
     jest.spyOn(loggerService, 'info').mockImplementation(jest.fn());
     jest.spyOn(loggerService, 'error').mockImplementation(jest.fn());
     findSensitiveValues.mockReturnValue([]);
@@ -44,7 +48,7 @@ describe('apiLoggingMiddleware', () => {
         method: req.method,
         path: req.path,
         headers: req.headers,
-        payload: req.body,
+        payload: req.body
       });
       expect(next).toHaveBeenCalled();
     });
@@ -60,7 +64,7 @@ describe('apiLoggingMiddleware', () => {
         method: req.method,
         path: req.path,
         headers: req.headers,
-        payload: { password: '******' },
+        payload: { password: '******' }
       });
       expect(next).toHaveBeenCalled();
     });
@@ -72,13 +76,15 @@ describe('apiLoggingMiddleware', () => {
         method: req.method,
         path: req.path,
         headers: req.headers,
-        payload: req.body,
+        payload: req.body
       });
       expect(next).toHaveBeenCalled();
     });
   });
 
   describe('response logging', () => {
+    let finishCallback: () => void;
+
     beforeEach(() => {
       apiLoggingMiddleware(req as Request, res as Response, next);
       finishCallback = res.on.mock.calls.find(call => call[0] === 'finish')![1];
@@ -89,7 +95,7 @@ describe('apiLoggingMiddleware', () => {
 
       expect(loggerService.info).toHaveBeenCalledWith('[RESPONSE]', {
         statusCode: res.statusCode,
-        headers: res.getHeaders(),
+        headers: res.getHeaders()
       });
     });
 
@@ -101,7 +107,7 @@ describe('apiLoggingMiddleware', () => {
       expect(loggerService.info).toHaveBeenCalledWith('[RESPONSE]', {
         statusCode: res.statusCode,
         headers: res.getHeaders(),
-        body: responseChunk,
+        body: responseChunk
       });
     });
 
@@ -113,7 +119,7 @@ describe('apiLoggingMiddleware', () => {
       expect(loggerService.info).toHaveBeenCalledWith('[RESPONSE]', {
         statusCode: res.statusCode,
         headers: res.getHeaders(),
-        body: responseBody,
+        body: responseBody
       });
     });
 
@@ -127,7 +133,7 @@ describe('apiLoggingMiddleware', () => {
       expect(loggerService.info).toHaveBeenCalledWith('[RESPONSE]', {
         statusCode: res.statusCode,
         headers: res.getHeaders(),
-        body: '{"password":"******"}',
+        body: '{"password":"******"}'
       });
     });
 
@@ -137,12 +143,14 @@ describe('apiLoggingMiddleware', () => {
 
       expect(loggerService.info).toHaveBeenCalledWith('[RESPONSE]', {
         statusCode: res.statusCode,
-        headers: { 'content-type': 'application/json' },
+        headers: { 'content-type': 'application/json' }
       });
     });
   });
 
   describe('error logging', () => {
+    let errorCallback: (err: any) => void;
+
     beforeEach(() => {
       apiLoggingMiddleware(req as Request, res as Response, next);
       errorCallback = res.on.mock.calls.find(call => call[0] === 'error')![1];
@@ -155,7 +163,7 @@ describe('apiLoggingMiddleware', () => {
       expect(loggerService.error).toHaveBeenCalledWith('[ERROR]', {
         message: error.message,
         stack: error.stack,
-        statusCode: res.statusCode,
+        statusCode: res.statusCode
       });
     });
   });
@@ -165,7 +173,7 @@ describe('apiLoggingMiddleware', () => {
 
     beforeEach(() => {
       capturedBody = undefined;
-      captureResponseBody(res as Response, (body) => {
+      captureResponseBody(res as Response, (body: any) => {
         capturedBody = body;
       });
     });
