@@ -64,12 +64,17 @@ describe('apiLoggingMiddleware', () => {
 
   it('should scrub sensitive values from request', () => {
     (findSensitiveValues as jest.Mock).mockReturnValue(['password']);
-
     req.body = { password: 'secret' };
 
     apiLoggingMiddleware(req as Request, res as Response, next);
 
     expect(scrub).toHaveBeenCalledWith({ payload: { password: 'secret' } }, ['password']);
+    expect(loggerService.info).toHaveBeenCalledWith('[REQUEST]', {
+      method: 'GET',
+      path: '/test',
+      headers: {},
+      payload: { password: '******' },
+    });
     expect(next).toHaveBeenCalled();
   });
 
@@ -79,16 +84,25 @@ describe('apiLoggingMiddleware', () => {
     apiLoggingMiddleware(req as Request, res as Response, next);
 
     const responseBodyCallback = (res.on as jest.Mock).mock.calls[0][1];
-    res.write('response body');
+    res.write('{"password":"responseSecret"}');
+    res.end();
+    
     responseBodyCallback();
 
-    expect(scrub).toHaveBeenCalledWith({ body: 'response body' }, ['password']);
+    expect(scrub).toHaveBeenCalledWith({ body: '{"password":"responseSecret"}' }, ['password']);
+    expect(loggerService.info).toHaveBeenCalledWith('[RESPONSE]', {
+      statusCode: 200,
+      statusMessage: 'OK',
+      headers: {},
+      body: '{"password":"******"}',
+    });
   });
 
   it('should log error if response has an error', () => {
     const error = new Error('Test Error');
 
     apiLoggingMiddleware(req as Request, res as Response, next);
+
     const errorCallback = (res.on as jest.Mock).mock.calls[1][1];
     errorCallback(error);
 
@@ -112,6 +126,7 @@ describe('apiLoggingMiddleware', () => {
       statusCode: 200,
       statusMessage: 'OK',
       headers: { 'content-type': 'application/json' },
+      body: undefined,
     });
   });
 
@@ -142,7 +157,6 @@ describe('apiLoggingMiddleware', () => {
       headers: {},
       payload: {},
     });
-
     expect(next).toHaveBeenCalled();
   });
 
