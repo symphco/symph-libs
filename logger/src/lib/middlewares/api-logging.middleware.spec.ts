@@ -39,8 +39,8 @@ describe('apiLoggingMiddleware', () => {
       apiLoggingMiddleware(req as Request, res as Response, next);
 
       expect(loggerService.info).toHaveBeenCalledWith('[REQUEST]', {
-        method: 'GET',
-        path: '/test',
+        method: req.method,
+        path: req.path,
         headers: req.headers,
         payload: req.body,
       });
@@ -55,8 +55,8 @@ describe('apiLoggingMiddleware', () => {
 
       expect(scrub).toHaveBeenCalledWith(req.body, ['password']);
       expect(loggerService.info).toHaveBeenCalledWith('[REQUEST]', {
-        method: 'GET',
-        path: '/test',
+        method: req.method,
+        path: req.path,
         headers: req.headers,
         payload: { password: '******' },
       });
@@ -67,8 +67,8 @@ describe('apiLoggingMiddleware', () => {
       apiLoggingMiddleware(req as Request, res as Response, next);
 
       expect(loggerService.info).toHaveBeenCalledWith('[REQUEST]', {
-        method: 'GET',
-        path: '/test',
+        method: req.method,
+        path: req.path,
         headers: req.headers,
         payload: req.body,
       });
@@ -95,7 +95,7 @@ describe('apiLoggingMiddleware', () => {
       });
     });
 
-    it('logs response with body written using res.write', () => {
+    it('logs response body written using res.write', () => {
       const responseChunk = 'This is a response';
       (res.write as jest.Mock).mockReturnValueOnce(responseChunk);
       finishCallback();
