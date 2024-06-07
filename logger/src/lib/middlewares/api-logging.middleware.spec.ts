@@ -36,6 +36,10 @@ describe('apiLoggingMiddleware', () => {
     jest.spyOn(loggerService, 'error').mockImplementation(() => {});
   });
 
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
   describe('request logging', () => {
     it('logs request without sensitive values and calls next middleware', () => {
       findSensitiveValues.mockReturnValue([]);
