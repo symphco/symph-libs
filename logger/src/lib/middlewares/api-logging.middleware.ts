@@ -49,7 +49,6 @@ export function apiLoggingMiddleware(
       statusCode: res.statusCode,
       statusMessage: res.statusMessage,
       headers: res.getHeaders(),
-      body: responseBody?.toString(),
     };
 
     const sensitiveValues = findSensitiveValues(response);
