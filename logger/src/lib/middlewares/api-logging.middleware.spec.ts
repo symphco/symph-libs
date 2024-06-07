@@ -1,8 +1,8 @@
 typescript
 import { scrub, findSensitiveValues } from '@zapier/secret-scrubber';
 import { Request, Response, NextFunction } from 'express';
-import { LoggerService } from '../services/logger.service';
 import { apiLoggingMiddleware } from '../middlewares/apiLoggingMiddleware';
+import { LoggerService } from '../services/logger.service';
 
 jest.mock('@zapier/secret-scrubber');
 jest.mock('../services/logger.service');
