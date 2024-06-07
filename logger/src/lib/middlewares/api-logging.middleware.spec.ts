@@ -194,9 +194,7 @@ describe('apiLoggingMiddleware', () => {
       const chunk1 = 'first chunk';
       const chunk2 = 'second chunk';
 
-      (res.write as jest.Mock).mockImplementationOnce(() => chunk1);
-      (res.write as jest.Mock).mockImplementationOnce(() => chunk2);
-
+      (res.write as jest.Mock).mockImplementation(() => {});
       res.write(chunk1);
       res.write(chunk2);
       res.end();
@@ -208,8 +206,8 @@ describe('apiLoggingMiddleware', () => {
       const chunk1 = 'first chunk';
       const endChunk = 'end chunk';
 
-      (res.write as jest.Mock).mockImplementationOnce(() => chunk1);
-      (res.end as jest.Mock).mockImplementationOnce(() => endChunk);
+      (res.write as jest.Mock).mockImplementation(() => {});
+      (res.end as jest.Mock).mockImplementation(() => {});
 
       res.write(chunk1);
       res.end(endChunk);
