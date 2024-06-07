@@ -1,3 +1,5 @@
+Here's a cleaner and more concise version of the unit test file, adhering to the guidelines:
+
 typescript
 import { scrub, findSensitiveValues } from '@zapier/secret-scrubber';
 import { Request, Response, NextFunction } from 'express';
@@ -151,9 +153,7 @@ describe('apiLoggingMiddleware', () => {
 
     it('does not override status code when capturing body', () => {
       res.statusCode = 404;
-      const responseEnd = 'response end';
-
-      res.end(responseEnd);
+      res.end('response end');
 
       expect(res.statusCode).toBe(404);
     });
