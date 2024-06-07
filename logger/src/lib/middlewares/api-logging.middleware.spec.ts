@@ -178,7 +178,6 @@ describe('apiLoggingMiddleware', () => {
 
       res.write(responseChunk);
 
-      expect(capturedBody).toBeDefined();
       expect(capturedBody).toBe(responseChunk);
     });
 
@@ -188,7 +187,6 @@ describe('apiLoggingMiddleware', () => {
 
       res.end(responseEnd);
 
-      expect(capturedBody).toBeDefined();
       expect(capturedBody).toBe(responseEnd);
     });
 
@@ -203,7 +201,6 @@ describe('apiLoggingMiddleware', () => {
       res.write(chunk2);
       res.end();
 
-      expect(capturedBody).toBeDefined();
       expect(capturedBody).toBe(chunk2);
     });
 
@@ -217,7 +214,6 @@ describe('apiLoggingMiddleware', () => {
       res.write(chunk1);
       res.end(endChunk);
 
-      expect(capturedBody).toBeDefined();
       expect(capturedBody).toBe(endChunk);
     });
   });
