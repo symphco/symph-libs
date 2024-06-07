@@ -1,5 +1,4 @@
 typescript
-typescript
 import { scrub, findSensitiveValues } from '@zapier/secret-scrubber';
 import { Request, Response, NextFunction } from 'express';
 import { apiLoggingMiddleware, captureResponseBody } from './api-logging.middleware';
@@ -14,6 +13,7 @@ describe('apiLoggingMiddleware', () => {
   let next: NextFunction;
   let loggerService: LoggerService;
   let finishCallback: () => void;
+  let errorCallback: (err: any) => void;
 
   beforeEach(() => {
     req = {
@@ -55,6 +55,7 @@ describe('apiLoggingMiddleware', () => {
         payload: req.body,
       });
       expect(next).toHaveBeenCalled();
+      expect(scrub).not.toHaveBeenCalled();
     });
 
     it('scrubs sensitive values from request and logs it', () => {
@@ -90,6 +91,7 @@ describe('apiLoggingMiddleware', () => {
     beforeEach(() => {
       apiLoggingMiddleware(req as Request, res as Response, next);
       finishCallback = res.on.mock.calls.find(call => call[0] === 'finish')![1];
+      errorCallback = res.on.mock.calls.find(call => call[0] === 'error')![1];
     });
 
     it('logs response without sensitive values on finish', () => {
@@ -136,7 +138,7 @@ describe('apiLoggingMiddleware', () => {
         body: '{"password":"******"}',
       });
     });
-      
+
     it('logs response with updated headers', () => {
       res.getHeaders.mockReturnValue({ 'content-type': 'application/json' });
       finishCallback();
@@ -151,9 +153,6 @@ describe('apiLoggingMiddleware', () => {
   describe('error logging', () => {
     it('logs error if response emits an error', () => {
       const error = new Error('Test Error');
-      apiLoggingMiddleware(req as Request, res as Response, next);
-
-      const errorCallback = res.on.mock.calls.find(call => call[0] === 'error')![1];
       errorCallback(error);
 
       expect(loggerService.error).toHaveBeenCalledWith('[ERROR]', {
