@@ -1,5 +1,3 @@
-Here is the modified unit test file content:
-
 typescript
 import { scrub, findSensitiveValues } from '@zapier/secret-scrubber';
 import { Request, Response, NextFunction } from 'express';
@@ -203,7 +201,12 @@ describe('apiLoggingMiddleware', () => {
       res.end(endChunk);
       expect(capturedBody).toBe(endChunk);
     });
+
+    it('calls callback on response finish', () => {
+      const responseEnd = 'response end';
+      (res.write as jest.Mock).mockImplementationOnce(() => responseEnd);
+      finishCallback();
+      expect(capturedBody).toBe(responseEnd);
+    });
   });
 });
-
-
