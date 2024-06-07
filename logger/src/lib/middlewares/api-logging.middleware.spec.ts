@@ -34,6 +34,8 @@ describe('apiLoggingMiddleware', () => {
     loggerService = new LoggerService();
     jest.spyOn(loggerService, 'info').mockImplementation(() => {});
     jest.spyOn(loggerService, 'error').mockImplementation(() => {});
+
+    findSensitiveValues.mockReturnValue([]);
   });
 
   afterEach(() => {
@@ -42,7 +44,6 @@ describe('apiLoggingMiddleware', () => {
 
   describe('request logging', () => {
     it('logs request without sensitive values and calls next middleware', () => {
-      findSensitiveValues.mockReturnValue([]);
       apiLoggingMiddleware(req as Request, res as Response, next);
 
       expect(loggerService.info).toHaveBeenCalledWith('[REQUEST]', {
@@ -71,7 +72,6 @@ describe('apiLoggingMiddleware', () => {
     });
 
     it('logs request with empty body gracefully', () => {
-      req.body = {};
       apiLoggingMiddleware(req as Request, res as Response, next);
 
       expect(loggerService.info).toHaveBeenCalledWith('[REQUEST]', {
@@ -85,14 +85,14 @@ describe('apiLoggingMiddleware', () => {
   });
 
   describe('response logging', () => {
+    let finishCallback: () => void;
+
     beforeEach(() => {
-      findSensitiveValues.mockReturnValue([]);
+      apiLoggingMiddleware(req as Request, res as Response, next);
+      finishCallback = res.on.mock.calls[0][1];
     });
 
     it('logs response without sensitive values on finish', () => {
-      apiLoggingMiddleware(req as Request, res as Response, next);
-
-      const finishCallback = res.on.mock.calls[0][1];
       finishCallback();
 
       expect(loggerService.info).toHaveBeenCalledWith('[RESPONSE]', {
@@ -104,9 +104,7 @@ describe('apiLoggingMiddleware', () => {
     it('scrubs sensitive values from response body before logging', () => {
       findSensitiveValues.mockReturnValue(['password']);
       res.write('{"password":"responseSecret"}');
-      apiLoggingMiddleware(req as Request, res as Response, next);
 
-      const finishCallback = res.on.mock.calls[0][1];
       finishCallback();
 
       expect(scrub).toHaveBeenCalledWith({ body: '{"password":"responseSecret"}' }, ['password']);
@@ -119,9 +117,7 @@ describe('apiLoggingMiddleware', () => {
 
     it('logs response with updated headers', () => {
       res.getHeaders.mockReturnValue({ 'content-type': 'application/json' });
-      apiLoggingMiddleware(req as Request, res as Response, next);
 
-      const finishCallback = res.on.mock.calls[0][1];
       finishCallback();
 
       expect(loggerService.info).toHaveBeenCalledWith('[RESPONSE]', {
@@ -131,12 +127,9 @@ describe('apiLoggingMiddleware', () => {
     });
 
     it('captures and logs complete response body', () => {
-      apiLoggingMiddleware(req as Request, res as Response, next);
-
       res.write('This is a response');
       res.end();
 
-      const finishCallback = res.on.mock.calls[0][1];
       finishCallback();
 
       expect(loggerService.info).toHaveBeenCalledWith('[RESPONSE]', {
@@ -148,12 +141,9 @@ describe('apiLoggingMiddleware', () => {
 
     it('handles and logs non-JSON response body', () => {
       const responseBody = '<html>response</html>';
-      apiLoggingMiddleware(req as Request, res as Response, next);
-
       res.write(responseBody);
       res.end();
 
-      const finishCallback = res.on.mock.calls[0][1];
       finishCallback();
 
       expect(loggerService.info).toHaveBeenCalledWith('[RESPONSE]', {
