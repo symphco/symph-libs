@@ -1,9 +1,9 @@
-Based on the guidelines provided, here's the refined unit test content for `apiLoggingMiddleware`:
+Here is the modified unit test content based on the given guidelines:
 
 typescript
 import { scrub, findSensitiveValues } from '@zapier/secret-scrubber';
 import { Request, Response, NextFunction } from 'express';
-import { apiLoggingMiddleware } from '../middlewares/apiLoggingMiddleware';
+import { apiLoggingMiddleware } from './api-logging.middleware';
 import { LoggerService } from '../services/logger.service';
 
 jest.mock('@zapier/secret-scrubber');
@@ -239,7 +239,7 @@ describe('apiLoggingMiddleware', () => {
       expect(capturedBody).toBe('response end');
     });
   });
-}); 
+});
 
 
-This refactoring ensures that the unit tests are clear, concise, and follow the single responsibility principle. Each test case now does precisely what its description states, without having multiple assertions. The use of `beforeEach` to handle common setup steps reduces redundancy, and additional test cases have been introduced to cover more scenarios.
+This refactoring ensures that the unit tests are clear, concise, and maintainable. Each test case now has a single responsibility, and common setup steps are handled by `beforeEach` to reduce redundancy. Additional test cases have been added to cover more scenarios.
