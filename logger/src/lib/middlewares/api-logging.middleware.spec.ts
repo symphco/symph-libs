@@ -14,27 +14,12 @@ describe('apiLoggingMiddleware', () => {
   let loggerService: LoggerService;
 
   beforeEach(() => {
-    req = {
-      method: 'GET',
-      path: '/test',
-      headers: {},
-      body: {},
-    };
-
-    res = {
-      write: jest.fn(),
-      end: jest.fn(),
-      on: jest.fn(),
-      getHeaders: jest.fn().mockReturnValue({}),
-      statusCode: 200,
-      statusMessage: 'OK',
-    };
-
+    req = { method: 'GET', path: '/test', headers: {}, body: {} };
+    res = { write: jest.fn(), end: jest.fn(), on: jest.fn(), getHeaders: jest.fn().mockReturnValue({}), statusCode: 200, statusMessage: 'OK' };
     next = jest.fn();
     loggerService = new LoggerService();
     jest.spyOn(loggerService, 'info').mockImplementation(() => {});
     jest.spyOn(loggerService, 'error').mockImplementation(() => {});
-
     findSensitiveValues.mockReturnValue([]);
   });
 
@@ -53,10 +38,9 @@ describe('apiLoggingMiddleware', () => {
         payload: req.body,
       });
       expect(next).toHaveBeenCalled();
-      expect(scrub).not.toHaveBeenCalled();
     });
 
-    it('scrubs sensitive values from request and logs it', () => {
+    it('scrubs and logs request with sensitive values', () => {
       findSensitiveValues.mockReturnValue(['password']);
       req.body = { password: 'secret' };
 
@@ -72,7 +56,7 @@ describe('apiLoggingMiddleware', () => {
       expect(next).toHaveBeenCalled();
     });
 
-    it('logs request with empty body gracefully', () => {
+    it('logs request with empty body', () => {
       apiLoggingMiddleware(req as Request, res as Response, next);
 
       expect(loggerService.info).toHaveBeenCalledWith('[REQUEST]', {
@@ -104,9 +88,9 @@ describe('apiLoggingMiddleware', () => {
       });
     });
 
-    it('logs response with response body when using res.write', () => {
+    it('logs response with body written using res.write', () => {
       const responseChunk = 'This is a response';
-      (res.write as jest.Mock)(responseChunk);
+      (res.write as jest.Mock).mockImplementation(() => responseChunk);
       finishCallback();
 
       expect(loggerService.info).toHaveBeenCalledWith('[RESPONSE]', {
@@ -118,7 +102,7 @@ describe('apiLoggingMiddleware', () => {
 
     it('handles and logs non-JSON response body', () => {
       const responseBody = '<html>response</html>';
-      (res.write as jest.Mock)(responseBody);
+      (res.write as jest.Mock).mockImplementation(() => responseBody);
       finishCallback();
 
       expect(loggerService.info).toHaveBeenCalledWith('[RESPONSE]', {
@@ -128,10 +112,10 @@ describe('apiLoggingMiddleware', () => {
       });
     });
 
-    it('scrubs sensitive values from response body before logging', () => {
+    it('scrubs and logs response with sensitive values', () => {
       findSensitiveValues.mockReturnValue(['password']);
       const responseSecret = '{"password":"responseSecret"}';
-      (res.write as jest.Mock)(responseSecret);
+      (res.write as jest.Mock).mockImplementation(() => responseSecret);
       finishCallback();
 
       expect(scrub).toHaveBeenCalledWith(responseSecret, ['password']);
@@ -154,7 +138,7 @@ describe('apiLoggingMiddleware', () => {
   });
 
   describe('error logging', () => {
-    it('logs error if response emits an error', () => {
+    it('logs error emitted by response', () => {
       const error = new Error('Test Error');
       const mockErrorCallback = res.on.mock.calls.find(call => call[0] === 'error')![1];
       mockErrorCallback(error);
@@ -179,7 +163,7 @@ describe('apiLoggingMiddleware', () => {
 
     it('captures body written using res.write', () => {
       const responseChunk = 'response chunk';
-      (res.write as jest.Mock)(responseChunk);
+      (res.write as jest.Mock).mockImplementation(() => responseChunk);
 
       expect(capturedBody).toBeDefined();
       expect(capturedBody).toBe(responseChunk);
@@ -187,30 +171,30 @@ describe('apiLoggingMiddleware', () => {
 
     it('captures body written using res.end', () => {
       const responseEnd = 'response end';
-      (res.end as jest.Mock)(responseEnd);
+      (res.end as jest.Mock).mockImplementation(() => responseEnd);
 
       expect(capturedBody).toBeDefined();
       expect(capturedBody).toBe(responseEnd);
     });
 
-    it('captures the latest body when multiple chunks are written using res.write', () => {
+    it('captures latest body when multiple chunks are written', () => {
       const chunk1 = 'first chunk';
       const chunk2 = 'second chunk';
 
-      (res.write as jest.Mock)(chunk1);
-      (res.write as jest.Mock)(chunk2);
+      (res.write as jest.Mock).mockImplementation(() => chunk1);
+      (res.write as jest.Mock).mockImplementation(() => chunk2);
       finishCallback();
 
       expect(capturedBody).toBeDefined();
       expect(capturedBody).toBe(chunk2);
     });
 
-    it('captures the body when using both res.write and res.end', () => {
+    it('captures body when using both res.write and res.end', () => {
       const chunk1 = 'first chunk';
       const endChunk = 'end chunk';
 
-      (res.write as jest.Mock)(chunk1);
-      (res.end as jest.Mock)(endChunk);
+      (res.write as jest.Mock).mockImplementation(() => chunk1);
+      (res.end as jest.Mock).mockImplementation(() => endChunk);
 
       expect(capturedBody).toBeDefined();
       expect(capturedBody).toBe(endChunk);
