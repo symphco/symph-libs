@@ -1,5 +1,4 @@
-Here's the revised unit test file content:
-
+typescript
 typescript
 import { scrub, findSensitiveValues } from '@zapier/secret-scrubber';
 import { Request, Response, NextFunction } from 'express';
@@ -104,7 +103,6 @@ describe('apiLoggingMiddleware', () => {
 
     it('logs response body correctly when using res.write', () => {
       res.write('This is a response');
-      res.end();
       finishCallback();
 
       expect(loggerService.info).toHaveBeenCalledWith('[RESPONSE]', {
@@ -117,7 +115,6 @@ describe('apiLoggingMiddleware', () => {
     it('handles and logs non-JSON response body', () => {
       const responseBody = '<html>response</html>';
       res.write(responseBody);
-      res.end();
       finishCallback();
 
       expect(loggerService.info).toHaveBeenCalledWith('[RESPONSE]', {
@@ -193,6 +190,3 @@ describe('apiLoggingMiddleware', () => {
     });
   });
 });
-
-
-This revision adheres to clean code principles, makes use of `beforeEach` and `afterEach` appropriately to avoid repetition, and ensures each test case adheres to the single responsibility principle. The test cases are concise, clear, and comprehensible.
