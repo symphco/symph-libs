@@ -1,4 +1,4 @@
-"""typescript
+typescript
 import { scrub, findSensitiveValues } from '@zapier/secret-scrubber';
 import { Request, Response, NextFunction } from 'express';
 import { apiLoggingMiddleware, captureResponseBody } from './api-logging.middleware';
@@ -210,6 +210,9 @@ describe('apiLoggingMiddleware', () => {
 
       expect(capturedBody).toBe(responseEnd);
     });
+
+    it('captureResponseBody should be defined', () => {
+      expect(captureResponseBody).toBeDefined();
+    });
   });
 });
-"""
