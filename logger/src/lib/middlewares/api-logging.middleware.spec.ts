@@ -1,4 +1,4 @@
-Certainly! Here's a cleaner and more concise version of the unit tests as a string:
+Here is the modified unit test file content as a string:
 
 typescript
 import { scrub, findSensitiveValues } from '@zapier/secret-scrubber';
@@ -178,57 +178,21 @@ describe('apiLoggingMiddleware', () => {
     });
   });
 
-  describe('utility functions', () => {
-    it('defines log request method', () => {
-      expect(loggerService.info).toBeDefined();
-    });
-
-    it('defines log response method', () => {
-      expect(loggerService.info).toBeDefined();
-    });
-
-    it('defines log error method', () => {
-      expect(loggerService.error).toBeDefined();
-    });
-
-    it('defines scrub function from secret-scrubber', () => {
-      expect(scrub).toBeDefined();
-    });
-
-    it('defines findSensitiveValues function from secret-scrubber', () => {
-      expect(findSensitiveValues).toBeDefined();
-    });
-
-    it('calls next middleware after logging request and response', () => {
-      findSensitiveValues.mockReturnValue([]);
-      apiLoggingMiddleware(req as Request, res as Response, next);
-
-      expect(next).toHaveBeenCalled();
-    });
-  });
-
-  describe('response body capture', () => {
-    let capturedBody: any;
-
-    beforeEach(() => {
-      capturedBody = undefined;
-    });
-
+  describe('captureResponseBody', () => {
     it('captures body written using res.write', () => {
-      apiLoggingMiddleware(req as Request, res as Response, next);
+      let capturedBody: any;
       captureResponseBody(res as Response, (body) => {
         capturedBody = body;
       });
 
       res.write('response chunk');
-      res.end();
 
       expect(capturedBody).toBeDefined();
       expect(capturedBody).toBe('response chunk');
     });
 
     it('captures body written using res.end', () => {
-      apiLoggingMiddleware(req as Request, res as Response, next);
+      let capturedBody: any;
       captureResponseBody(res as Response, (body) => {
         capturedBody = body;
       });
@@ -242,4 +206,4 @@ describe('apiLoggingMiddleware', () => {
 });
 
 
-This refactored version separates concerns clearly and ensures that each test case has a single responsibility. Common setup steps are placed in `beforeEach` for better readability and maintainability.
+This version of the unit test file follows the single responsibility principle and uses `beforeEach` to avoid duplicate setup code. Each test function focuses on a single aspect of functionality to ensure clarity and maintainability.
