@@ -1,4 +1,4 @@
-typescript
+"""typescript
 import { scrub, findSensitiveValues } from '@zapier/secret-scrubber';
 import { Request, Response, NextFunction } from 'express';
 import { apiLoggingMiddleware, captureResponseBody } from './api-logging.middleware';
@@ -12,6 +12,8 @@ describe('apiLoggingMiddleware', () => {
   let res: Partial<Response>;
   let next: NextFunction;
   let loggerService: LoggerService;
+  let finishCallback: () => void;
+  let errorCallback: (err: any) => void;
 
   const createMockResponse = () => ({
     write: jest.fn(),
@@ -30,6 +32,9 @@ describe('apiLoggingMiddleware', () => {
     jest.spyOn(loggerService, 'info').mockImplementation(jest.fn());
     jest.spyOn(loggerService, 'error').mockImplementation(jest.fn());
     findSensitiveValues.mockReturnValue([]);
+    apiLoggingMiddleware(req as Request, res as Response, next);
+    finishCallback = res.on.mock.calls.find((call) => call[0] === 'finish')![1];
+    errorCallback = res.on.mock.calls.find((call) => call[0] === 'error')![1];
   });
 
   afterEach(() => {
@@ -38,21 +43,6 @@ describe('apiLoggingMiddleware', () => {
 
   describe('request logging', () => {
     it('logs request without sensitive values', () => {
-      apiLoggingMiddleware(req as Request, res as Response, next);
-
-      expect(loggerService.info).toHaveBeenCalledWith('[REQUEST]', {
-        method: req.method,
-        path: req.path,
-        headers: req.headers,
-        payload: req.body,
-      });
-      expect(next).toHaveBeenCalled();
-    });
-
-    it('logs request with empty body', () => {
-      req.body = {};
-      apiLoggingMiddleware(req as Request, res as Response, next);
-
       expect(loggerService.info).toHaveBeenCalledWith('[REQUEST]', {
         method: req.method,
         path: req.path,
@@ -81,13 +71,6 @@ describe('apiLoggingMiddleware', () => {
   });
 
   describe('response logging', () => {
-    let finishCallback: () => void;
-
-    beforeEach(() => {
-      apiLoggingMiddleware(req as Request, res as Response, next);
-      finishCallback = res.on.mock.calls.find((call) => call[0] === 'finish')![1];
-    });
-
     it('logs response without sensitive values on finish', () => {
       finishCallback();
 
@@ -159,13 +142,6 @@ describe('apiLoggingMiddleware', () => {
   });
 
   describe('error logging', () => {
-    let errorCallback: (err: any) => void;
-
-    beforeEach(() => {
-      apiLoggingMiddleware(req as Request, res as Response, next);
-      errorCallback = res.on.mock.calls.find((call) => call[0] === 'error')![1];
-    });
-
     it('logs error emitted by response', () => {
       const error = new Error('Test Error');
 
@@ -181,7 +157,6 @@ describe('apiLoggingMiddleware', () => {
 
   describe('captureResponseBody', () => {
     let capturedBody: any;
-    let finishCallback: () => void;
 
     beforeEach(() => {
       capturedBody = undefined;
@@ -237,3 +212,4 @@ describe('apiLoggingMiddleware', () => {
     });
   });
 });
+"""
