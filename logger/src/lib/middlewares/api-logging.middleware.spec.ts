@@ -104,13 +104,14 @@ describe('apiLoggingMiddleware', () => {
     });
 
     it('logs response body correctly when using res.write', () => {
-      res.write('This is a response');
+      const responseChunk = 'This is a response';
+      res.write(responseChunk);
       finishCallback();
 
       expect(loggerService.info).toHaveBeenCalledWith('[RESPONSE]', {
         statusCode: res.statusCode,
         headers: res.getHeaders(),
-        body: 'This is a response',
+        body: responseChunk,
       });
     });
 
@@ -128,10 +129,11 @@ describe('apiLoggingMiddleware', () => {
 
     it('scrubs sensitive values from response body before logging', () => {
       findSensitiveValues.mockReturnValue(['password']);
-      res.write('{"password":"responseSecret"}');
+      const responseSecret = '{"password":"responseSecret"}';
+      res.write(responseSecret);
       finishCallback();
 
-      expect(scrub).toHaveBeenCalledWith('{"password":"responseSecret"}', ['password']);
+      expect(scrub).toHaveBeenCalledWith(responseSecret, ['password']);
       expect(loggerService.info).toHaveBeenCalledWith('[RESPONSE]', {
         statusCode: res.statusCode,
         headers: res.getHeaders(),
@@ -164,28 +166,29 @@ describe('apiLoggingMiddleware', () => {
   });
 
   describe('captureResponseBody', () => {
-    it('captures body written using res.write', () => {
-      let capturedBody: any;
+    let capturedBody: any;
+
+    beforeEach(() => {
+      capturedBody = undefined;
       captureResponseBody(res as Response, (body) => {
         capturedBody = body;
       });
+    });
 
-      res.write('response chunk');
+    it('captures body written using res.write', () => {
+      const responseChunk = 'response chunk';
+      res.write(responseChunk);
 
       expect(capturedBody).toBeDefined();
-      expect(capturedBody).toBe('response chunk');
+      expect(capturedBody).toBe(responseChunk);
     });
 
     it('captures body written using res.end', () => {
-      let capturedBody: any;
-      captureResponseBody(res as Response, (body) => {
-        capturedBody = body;
-      });
-
-      res.end('response end');
+      const responseEnd = 'response end';
+      res.end(responseEnd);
 
       expect(capturedBody).toBeDefined();
-      expect(capturedBody).toBe('response end');
+      expect(capturedBody).toBe(responseEnd);
     });
   });
 });
