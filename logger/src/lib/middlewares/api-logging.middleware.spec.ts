@@ -36,6 +36,7 @@ beforeEach(() => {
 });
 
 describe('apiLoggingMiddleware', () => {
+
   describe('request logging', () => {
     it('logs request without sensitive values and calls next middleware', () => {
       (findSensitiveValues as jest.Mock).mockReturnValue([]);
@@ -177,7 +178,7 @@ describe('apiLoggingMiddleware', () => {
     });
   });
 
-  describe('utility function definitions', () => {
+  describe('utility functions', () => {
     it('defines log request method', () => {
       expect(loggerService.info).toBeDefined();
     });
@@ -203,6 +204,37 @@ describe('apiLoggingMiddleware', () => {
       apiLoggingMiddleware(req as Request, res as Response, next);
 
       expect(next).toHaveBeenCalled();
+    });
+  });
+
+  describe('response body capture', () => {
+    it('captures body written using res.write', () => {
+      let capturedBody;
+
+      apiLoggingMiddleware(req as Request, res as Response, next);
+      captureResponseBody(res as Response, (body) => {
+        capturedBody = body;
+      });
+
+      res.write('response chunk');
+      res.end();
+
+      expect(capturedBody).toBeDefined();
+      expect(capturedBody).toBe('response chunk');
+    });
+
+    it('captures body written using res.end', () => {
+      let capturedBody;
+
+      apiLoggingMiddleware(req as Request, res as Response, next);
+      captureResponseBody(res as Response, (body) => {
+        capturedBody = body;
+      });
+
+      res.end('response end');
+
+      expect(capturedBody).toBeDefined();
+      expect(capturedBody).toBe('response end');
     });
   });
 });
