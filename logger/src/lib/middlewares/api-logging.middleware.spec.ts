@@ -148,6 +148,15 @@ describe('apiLoggingMiddleware', () => {
         body: '{"password":"******"}'
       });
     });
+
+    it('does not override status code when capturing body', () => {
+      res.statusCode = 404;
+      const responseEnd = 'response end';
+
+      res.end(responseEnd);
+
+      expect(res.statusCode).toBe(404);
+    });
   });
 
   describe('error logging', () => {
@@ -226,16 +235,6 @@ describe('apiLoggingMiddleware', () => {
       finishCallback();
 
       expect(capturedBody).toBe(responseEnd);
-    });
-
-    it('does not override status code when capturing body', () => {
-      res.statusCode = 404;
-      const responseEnd = 'response end';
-
-      res.end(responseEnd);
-
-      expect(capturedBody).toBe(responseEnd);
-      expect(res.statusCode).toBe(404);
     });
   });
 });
