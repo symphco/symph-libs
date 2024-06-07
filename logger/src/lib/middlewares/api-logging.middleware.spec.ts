@@ -12,6 +12,8 @@ describe('apiLoggingMiddleware', () => {
   let res: Partial<Response>;
   let next: NextFunction;
   let loggerService: LoggerService;
+  let finishCallback: () => void;
+  let errorCallback: (err: any) => void;
 
   beforeEach(() => {
     req = { method: 'GET', path: '/test', headers: {}, body: {} };
@@ -77,8 +79,6 @@ describe('apiLoggingMiddleware', () => {
   });
 
   describe('response logging', () => {
-    let finishCallback: () => void;
-
     beforeEach(() => {
       apiLoggingMiddleware(req as Request, res as Response, next);
       finishCallback = res.on.mock.calls.find(call => call[0] === 'finish')![1];
@@ -143,8 +143,6 @@ describe('apiLoggingMiddleware', () => {
   });
 
   describe('error logging', () => {
-    let errorCallback: (err: any) => void;
-
     beforeEach(() => {
       apiLoggingMiddleware(req as Request, res as Response, next);
       errorCallback = res.on.mock.calls.find(call => call[0] === 'error')![1];
