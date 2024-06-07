@@ -11,7 +11,6 @@ let req: Partial<Request>;
 let res: Partial<Response>;
 let next: NextFunction;
 let loggerService: LoggerService;
-const sensitiveValues = ['password'];
 
 beforeEach(() => {
   req = {
@@ -64,25 +63,18 @@ describe('apiLoggingMiddleware', () => {
   });
 
   it('should scrub sensitive values from request', () => {
-    (findSensitiveValues as jest.Mock).mockReturnValue(sensitiveValues);
-    (scrub as jest.Mock).mockImplementation((obj) => obj);
+    (findSensitiveValues as jest.Mock).mockReturnValue(['password']);
 
     req.body = { password: 'secret' };
 
     apiLoggingMiddleware(req as Request, res as Response, next);
 
-    expect(loggerService.info).toHaveBeenCalledWith('[REQUEST]', {
-      method: 'GET',
-      path: '/test',
-      headers: {},
-      payload: { password: 'secret' },
-    });
+    expect(scrub).toHaveBeenCalledWith({ payload: { password: 'secret' } }, ['password']);
     expect(next).toHaveBeenCalled();
   });
 
   it('should scrub sensitive values from response', () => {
-    (findSensitiveValues as jest.Mock).mockReturnValue(sensitiveValues);
-    (scrub as jest.Mock).mockImplementation((obj) => obj);
+    (findSensitiveValues as jest.Mock).mockReturnValue(['password']);
 
     apiLoggingMiddleware(req as Request, res as Response, next);
 
@@ -90,12 +82,7 @@ describe('apiLoggingMiddleware', () => {
     res.write('response body');
     responseBodyCallback();
 
-    expect(loggerService.info).toHaveBeenCalledWith('[RESPONSE]', {
-      statusCode: 200,
-      statusMessage: 'OK',
-      headers: {},
-      body: 'response body',
-    });
+    expect(scrub).toHaveBeenCalledWith({ body: 'response body' }, ['password']);
   });
 
   it('should log error if response has an error', () => {
@@ -125,44 +112,14 @@ describe('apiLoggingMiddleware', () => {
       statusCode: 200,
       statusMessage: 'OK',
       headers: { 'content-type': 'application/json' },
-      body: undefined,
     });
   });
 
-  it('should define log request method', () => {
-    expect(loggerService.info).toBeDefined();
-  });
-
-  it('should define log response method', () => {
-    expect(loggerService.info).toBeDefined();
-  });
-
-  it('should define log error method', () => {
-    expect(loggerService.error).toBeDefined();
-  });
-
-  it('should define scrub function from secret-scrubber', () => {
-    expect(scrub).toBeDefined();
-  });
-
-  it('should define findSensitiveValues function from secret-scrubber', () => {
-    expect(findSensitiveValues).toBeDefined();
-  });
-
-  it('should call next middleware after logging request and response', () => {
-    (findSensitiveValues as jest.Mock).mockReturnValue([]);
-
-    apiLoggingMiddleware(req as Request, res as Response, next);
-
-    expect(next).toHaveBeenCalled();
-  });
-
-  it('should capture complete response body', ()  => {
-    const responseBody = 'This is a response';
+  it('should capture complete response body', () => {
     apiLoggingMiddleware(req as Request, res as Response, next);
 
     const responseBodyCallback = (res.on as jest.Mock).mock.calls[0][1];
-    res.write(responseBody);
+    res.write('This is a response');
     res.end();
 
     responseBodyCallback();
@@ -171,7 +128,7 @@ describe('apiLoggingMiddleware', () => {
       statusCode: 200,
       statusMessage: 'OK',
       headers: {},
-      body: responseBody,
+      body: 'This is a response',
     });
   });
 
@@ -205,5 +162,33 @@ describe('apiLoggingMiddleware', () => {
       headers: {},
       body: responseBody,
     });
+  });
+
+  it('should define log request method', () => {
+    expect(loggerService.info).toBeDefined();
+  });
+
+  it('should define log response method', () => {
+    expect(loggerService.info).toBeDefined();
+  });
+
+  it('should define log error method', () => {
+    expect(loggerService.error).toBeDefined();
+  });
+
+  it('should define scrub function from secret-scrubber', () => {
+    expect(scrub).toBeDefined();
+  });
+
+  it('should define findSensitiveValues function from secret-scrubber', () => {
+    expect(findSensitiveValues).toBeDefined();
+  });
+
+  it('should call next middleware after logging request and response', () => {
+    (findSensitiveValues as jest.Mock).mockReturnValue([]);
+
+    apiLoggingMiddleware(req as Request, res as Response, next);
+
+    expect(next).toHaveBeenCalled();
   });
 });
