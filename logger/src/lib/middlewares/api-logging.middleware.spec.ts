@@ -1,5 +1,3 @@
-Here's the modified unit test file content:
-
 typescript
 import { scrub, findSensitiveValues } from '@zapier/secret-scrubber';
 import { Request, Response, NextFunction } from 'express';
@@ -21,7 +19,7 @@ describe('apiLoggingMiddleware', () => {
     on: jest.fn(),
     getHeaders: jest.fn().mockReturnValue({}),
     statusCode: 200,
-    statusMessage: 'OK'
+    statusMessage: 'OK',
   });
 
   beforeEach(() => {
@@ -46,7 +44,7 @@ describe('apiLoggingMiddleware', () => {
         method: req.method,
         path: req.path,
         headers: req.headers,
-        payload: req.body
+        payload: req.body,
       });
       expect(next).toHaveBeenCalled();
     });
@@ -59,7 +57,7 @@ describe('apiLoggingMiddleware', () => {
         method: req.method,
         path: req.path,
         headers: req.headers,
-        payload: req.body
+        payload: req.body,
       });
       expect(next).toHaveBeenCalled();
     });
@@ -67,6 +65,7 @@ describe('apiLoggingMiddleware', () => {
     it('scrubs and logs request with sensitive values', () => {
       findSensitiveValues.mockReturnValue(['password']);
       req.body = { password: 'secret' };
+      scrub.mockReturnValue({ password: '******' });
 
       apiLoggingMiddleware(req as Request, res as Response, next);
 
@@ -75,7 +74,7 @@ describe('apiLoggingMiddleware', () => {
         method: req.method,
         path: req.path,
         headers: req.headers,
-        payload: { password: '******' }
+        payload: { password: '******' },
       });
       expect(next).toHaveBeenCalled();
     });
@@ -86,7 +85,7 @@ describe('apiLoggingMiddleware', () => {
 
     beforeEach(() => {
       apiLoggingMiddleware(req as Request, res as Response, next);
-      finishCallback = res.on.mock.calls.find(call => call[0] === 'finish')![1];
+      finishCallback = res.on.mock.calls.find((call) => call[0] === 'finish')![1];
     });
 
     it('logs response without sensitive values on finish', () => {
@@ -94,7 +93,7 @@ describe('apiLoggingMiddleware', () => {
 
       expect(loggerService.info).toHaveBeenCalledWith('[RESPONSE]', {
         statusCode: res.statusCode,
-        headers: res.getHeaders()
+        headers: res.getHeaders(),
       });
     });
 
@@ -105,7 +104,7 @@ describe('apiLoggingMiddleware', () => {
 
       expect(loggerService.info).toHaveBeenCalledWith('[RESPONSE]', {
         statusCode: res.statusCode,
-        headers: { 'content-type': 'application/json' }
+        headers: { 'content-type': 'application/json' },
       });
     });
 
@@ -118,7 +117,7 @@ describe('apiLoggingMiddleware', () => {
       expect(loggerService.info).toHaveBeenCalledWith('[RESPONSE]', {
         statusCode: res.statusCode,
         headers: res.getHeaders(),
-        body: responseChunk
+        body: responseChunk,
       });
     });
 
@@ -131,13 +130,14 @@ describe('apiLoggingMiddleware', () => {
       expect(loggerService.info).toHaveBeenCalledWith('[RESPONSE]', {
         statusCode: res.statusCode,
         headers: res.getHeaders(),
-        body: responseBody
+        body: responseBody,
       });
     });
 
     it('scrubs and logs response with sensitive values', () => {
       findSensitiveValues.mockReturnValue(['password']);
       const responseSecret = '{"password":"responseSecret"}';
+      scrub.mockReturnValue('{"password":"******"}');
       res.write(responseSecret);
 
       finishCallback();
@@ -146,7 +146,7 @@ describe('apiLoggingMiddleware', () => {
       expect(loggerService.info).toHaveBeenCalledWith('[RESPONSE]', {
         statusCode: res.statusCode,
         headers: res.getHeaders(),
-        body: '{"password":"******"}'
+        body: '{"password":"******"}',
       });
     });
 
@@ -163,7 +163,7 @@ describe('apiLoggingMiddleware', () => {
 
     beforeEach(() => {
       apiLoggingMiddleware(req as Request, res as Response, next);
-      errorCallback = res.on.mock.calls.find(call => call[0] === 'error')![1];
+      errorCallback = res.on.mock.calls.find((call) => call[0] === 'error')![1];
     });
 
     it('logs error emitted by response', () => {
@@ -174,7 +174,7 @@ describe('apiLoggingMiddleware', () => {
       expect(loggerService.error).toHaveBeenCalledWith('[ERROR]', {
         message: error.message,
         stack: error.stack,
-        statusCode: res.statusCode
+        statusCode: res.statusCode,
       });
     });
   });
@@ -189,7 +189,7 @@ describe('apiLoggingMiddleware', () => {
       captureResponseBody(res as Response, (body: any) => {
         capturedBody = body;
       });
-      finishCallback = res.on.mock.calls.find(call => call[0] === 'finish')![1];
+      finishCallback = res.on.mock.calls.find((call) => call[0] === 'finish')![1];
     });
 
     it('captures body written using res.write', () => {
@@ -237,6 +237,3 @@ describe('apiLoggingMiddleware', () => {
     });
   });
 });
-
-
-This version ensures each test case is independently testing a single piece of functionality, making the test suite more maintainable and easier to understand. We've used `beforeEach` to avoid repetitive code and properly encapsulated test scenarios to adhere to clean code principles.
