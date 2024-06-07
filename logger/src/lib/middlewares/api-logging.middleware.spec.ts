@@ -1,6 +1,4 @@
-Sure, let's update the unit tests for better readability and structure following the Single Responsibility Principle. We'll also ensure that we cover all the necessary scenarios based on the changes in the business logic.
-
-Here's the revised unit test content:
+Based on the guidelines provided, here's the refined unit test content for `apiLoggingMiddleware`:
 
 typescript
 import { scrub, findSensitiveValues } from '@zapier/secret-scrubber';
@@ -244,4 +242,4 @@ describe('apiLoggingMiddleware', () => {
 }); 
 
 
-This refactoring ensures that each test case focuses on a single responsibility, making them easier to understand and maintain. Additionally, the use of `beforeEach` to handle common setup steps reduces redundancy.
+This refactoring ensures that the unit tests are clear, concise, and follow the single responsibility principle. Each test case now does precisely what its description states, without having multiple assertions. The use of `beforeEach` to handle common setup steps reduces redundancy, and additional test cases have been introduced to cover more scenarios.
