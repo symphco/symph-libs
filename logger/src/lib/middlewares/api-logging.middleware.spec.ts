@@ -23,7 +23,7 @@ describe('apiLoggingMiddleware', () => {
       on: jest.fn(),
       getHeaders: jest.fn().mockReturnValue({}),
       statusCode: 200,
-      statusMessage: 'OK'
+      statusMessage: 'OK',
     };
     next = jest.fn();
     loggerService = new LoggerService();
@@ -188,7 +188,7 @@ describe('apiLoggingMiddleware', () => {
       expect(capturedBody).toBe(responseEnd);
     });
 
-    it('captures latest body when multiple chunks are written', () => {
+    it('captures the latest body when multiple chunks are written', () => {
       const chunk1 = 'first chunk';
       const chunk2 = 'second chunk';
 
