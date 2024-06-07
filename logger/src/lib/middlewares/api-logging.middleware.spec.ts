@@ -1,4 +1,4 @@
-Here's a cleaner and more concise version of the unit test file, adhering to the guidelines:
+Here's the modified unit test file content with considerations from the business logic changes:
 
 typescript
 import { scrub, findSensitiveValues } from '@zapier/secret-scrubber';
@@ -238,3 +238,6 @@ describe('apiLoggingMiddleware', () => {
     });
   });
 });
+
+
+In this revised version, I made sure to break down composite test cases, avoid redundant code using `beforeEach` and `afterEach`, and ensure clarity and readability. The existing tests were preserved, and relevant assertions were separated to follow the single responsibility principle.
