@@ -40,6 +40,7 @@ describe('apiLoggingMiddleware', () => {
   describe('request logging', () => {
     it('logs request without sensitive values and calls next middleware', () => {
       apiLoggingMiddleware(req as Request, res as Response, next);
+
       expect(loggerService.info).toHaveBeenCalledWith('[REQUEST]', {
         method: req.method,
         path: req.path,
@@ -88,6 +89,7 @@ describe('apiLoggingMiddleware', () => {
 
     it('logs response without sensitive values on finish', () => {
       finishCallback();
+
       expect(loggerService.info).toHaveBeenCalledWith('[RESPONSE]', {
         statusCode: res.statusCode,
         headers: res.getHeaders()
@@ -97,7 +99,9 @@ describe('apiLoggingMiddleware', () => {
     it('logs response body written using res.write', () => {
       const responseChunk = 'This is a response';
       (res.write as jest.Mock).mockImplementationOnce(() => responseChunk);
+
       finishCallback();
+
       expect(loggerService.info).toHaveBeenCalledWith('[RESPONSE]', {
         statusCode: res.statusCode,
         headers: res.getHeaders(),
@@ -108,7 +112,9 @@ describe('apiLoggingMiddleware', () => {
     it('handles and logs non-JSON response body', () => {
       const responseBody = '<html>response</html>';
       (res.write as jest.Mock).mockImplementationOnce(() => responseBody);
+
       finishCallback();
+
       expect(loggerService.info).toHaveBeenCalledWith('[RESPONSE]', {
         statusCode: res.statusCode,
         headers: res.getHeaders(),
@@ -120,7 +126,9 @@ describe('apiLoggingMiddleware', () => {
       findSensitiveValues.mockReturnValue(['password']);
       const responseSecret = '{"password":"responseSecret"}';
       (res.write as jest.Mock).mockImplementationOnce(() => responseSecret);
+
       finishCallback();
+
       expect(scrub).toHaveBeenCalledWith(responseSecret, ['password']);
       expect(loggerService.info).toHaveBeenCalledWith('[RESPONSE]', {
         statusCode: res.statusCode,
@@ -131,7 +139,9 @@ describe('apiLoggingMiddleware', () => {
 
     it('logs response with updated headers', () => {
       res.getHeaders.mockReturnValue({ 'content-type': 'application/json' });
+
       finishCallback();
+
       expect(loggerService.info).toHaveBeenCalledWith('[RESPONSE]', {
         statusCode: res.statusCode,
         headers: { 'content-type': 'application/json' }
@@ -149,7 +159,9 @@ describe('apiLoggingMiddleware', () => {
 
     it('logs error emitted by response', () => {
       const error = new Error('Test Error');
+
       errorCallback(error);
+
       expect(loggerService.error).toHaveBeenCalledWith('[ERROR]', {
         message: error.message,
         stack: error.stack,
@@ -171,14 +183,18 @@ describe('apiLoggingMiddleware', () => {
     it('captures body written using res.write', () => {
       const responseChunk = 'response chunk';
       (res.write as jest.Mock).mockImplementationOnce(() => responseChunk);
+
       res.write(responseChunk);
+
       expect(capturedBody).toBe(responseChunk);
     });
 
     it('captures body written using res.end', () => {
       const responseEnd = 'response end';
       (res.end as jest.Mock).mockImplementationOnce(() => responseEnd);
+
       res.end(responseEnd);
+
       expect(capturedBody).toBe(responseEnd);
     });
 
@@ -186,9 +202,11 @@ describe('apiLoggingMiddleware', () => {
       const chunk1 = 'first chunk';
       const chunk2 = 'second chunk';
       (res.write as jest.Mock).mockImplementation(() => {});
+
       res.write(chunk1);
       res.write(chunk2);
       res.end();
+
       expect(capturedBody).toBe(chunk2);
     });
 
@@ -197,15 +215,19 @@ describe('apiLoggingMiddleware', () => {
       const endChunk = 'end chunk';
       (res.write as jest.Mock).mockImplementation(() => {});
       (res.end as jest.Mock).mockImplementation(() => {});
+
       res.write(chunk1);
       res.end(endChunk);
+
       expect(capturedBody).toBe(endChunk);
     });
 
     it('calls callback on response finish', () => {
       const responseEnd = 'response end';
       (res.write as jest.Mock).mockImplementationOnce(() => responseEnd);
+
       finishCallback();
+
       expect(capturedBody).toBe(responseEnd);
     });
   });
