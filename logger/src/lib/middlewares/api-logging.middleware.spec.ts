@@ -1,5 +1,3 @@
-Here's the modified unit test file content based on your requirements:
-
 typescript
 import { scrub, findSensitiveValues } from '@zapier/secret-scrubber';
 import { Request, Response, NextFunction } from 'express';
@@ -17,7 +15,14 @@ describe('apiLoggingMiddleware', () => {
 
   beforeEach(() => {
     req = { method: 'GET', path: '/test', headers: {}, body: {} };
-    res = { write: jest.fn(), end: jest.fn(), on: jest.fn(), getHeaders: jest.fn().mockReturnValue({}), statusCode: 200, statusMessage: 'OK' };
+    res = { 
+      write: jest.fn(), 
+      end: jest.fn(), 
+      on: jest.fn(), 
+      getHeaders: jest.fn().mockReturnValue({}), 
+      statusCode: 200, 
+      statusMessage: 'OK' 
+    };
     next = jest.fn();
     loggerService = new LoggerService();
     jest.spyOn(loggerService, 'info').mockImplementation(jest.fn());
@@ -92,7 +97,7 @@ describe('apiLoggingMiddleware', () => {
 
     it('logs response with body written using res.write', () => {
       const responseChunk = 'This is a response';
-      (res.write as jest.Mock).mockImplementationOnce(() => responseChunk);
+      (res.write as jest.Mock).mockReturnValueOnce(responseChunk);
       finishCallback();
 
       expect(loggerService.info).toHaveBeenCalledWith('[RESPONSE]', {
@@ -104,7 +109,7 @@ describe('apiLoggingMiddleware', () => {
 
     it('handles and logs non-JSON response body', () => {
       const responseBody = '<html>response</html>';
-      (res.write as jest.Mock).mockImplementationOnce(() => responseBody);
+      (res.write as jest.Mock).mockReturnValueOnce(responseBody);
       finishCallback();
 
       expect(loggerService.info).toHaveBeenCalledWith('[RESPONSE]', {
@@ -117,7 +122,7 @@ describe('apiLoggingMiddleware', () => {
     it('scrubs and logs response with sensitive values', () => {
       findSensitiveValues.mockReturnValue(['password']);
       const responseSecret = '{"password":"responseSecret"}';
-      (res.write as jest.Mock).mockImplementationOnce(() => responseSecret);
+      (res.write as jest.Mock).mockReturnValueOnce(responseSecret);
       finishCallback();
 
       expect(scrub).toHaveBeenCalledWith(responseSecret, ['password']);
@@ -164,7 +169,7 @@ describe('apiLoggingMiddleware', () => {
 
     it('captures body written using res.write', () => {
       const responseChunk = 'response chunk';
-      (res.write as jest.Mock).mockImplementationOnce(() => responseChunk);
+      (res.write as jest.Mock).mockReturnValueOnce(responseChunk);
 
       res.write(responseChunk);
 
@@ -174,7 +179,7 @@ describe('apiLoggingMiddleware', () => {
 
     it('captures body written using res.end', () => {
       const responseEnd = 'response end';
-      (res.end as jest.Mock).mockImplementationOnce(() => responseEnd);
+      (res.end as jest.Mock).mockReturnValueOnce(responseEnd);
 
       res.end(responseEnd);
 
@@ -186,8 +191,8 @@ describe('apiLoggingMiddleware', () => {
       const chunk1 = 'first chunk';
       const chunk2 = 'second chunk';
 
-      (res.write as jest.Mock).mockImplementationOnce(() => chunk1);
-      (res.write as jest.Mock).mockImplementationOnce(() => chunk2);
+      (res.write as jest.Mock).mockReturnValueOnce(chunk1);
+      (res.write as jest.Mock).mockReturnValueOnce(chunk2);
 
       res.write(chunk1);
       res.write(chunk2);
@@ -201,8 +206,8 @@ describe('apiLoggingMiddleware', () => {
       const chunk1 = 'first chunk';
       const endChunk = 'end chunk';
 
-      (res.write as jest.Mock).mockImplementationOnce(() => chunk1);
-      (res.end as jest.Mock).mockImplementationOnce(() => endChunk);
+      (res.write as jest.Mock).mockReturnValueOnce(chunk1);
+      (res.end as jest.Mock).mockReturnValueOnce(endChunk);
 
       res.write(chunk1);
       res.end(endChunk);
@@ -212,6 +217,3 @@ describe('apiLoggingMiddleware', () => {
     });
   });
 });
-
-
-This version of the unit test file follows clean code principles, breaking down complex test cases into smaller, more focused ones while using shared setup and teardown logic to avoid duplication.
