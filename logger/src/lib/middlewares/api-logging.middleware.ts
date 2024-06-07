@@ -47,7 +47,6 @@ export function apiLoggingMiddleware(
   captureResponseBody(res, (responseBody = {}) => {
     const response = {
       statusCode: res.statusCode,
-      statusMessage: res.statusMessage,
       headers: res.getHeaders(),
     };
 
