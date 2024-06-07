@@ -103,9 +103,9 @@ describe('apiLoggingMiddleware', () => {
       });
     });
 
-    it('logs response body correctly when using res.write', () => {
+    it('logs response body when using res.write', () => {
       const responseChunk = 'This is a response';
-      res.write(responseChunk);
+      (res.write as jest.Mock)(responseChunk);
       finishCallback();
 
       expect(loggerService.info).toHaveBeenCalledWith('[RESPONSE]', {
@@ -117,7 +117,7 @@ describe('apiLoggingMiddleware', () => {
 
     it('handles and logs non-JSON response body', () => {
       const responseBody = '<html>response</html>';
-      res.write(responseBody);
+      (res.write as jest.Mock)(responseBody);
       finishCallback();
 
       expect(loggerService.info).toHaveBeenCalledWith('[RESPONSE]', {
@@ -130,7 +130,7 @@ describe('apiLoggingMiddleware', () => {
     it('scrubs sensitive values from response body before logging', () => {
       findSensitiveValues.mockReturnValue(['password']);
       const responseSecret = '{"password":"responseSecret"}';
-      res.write(responseSecret);
+      (res.write as jest.Mock)(responseSecret);
       finishCallback();
 
       expect(scrub).toHaveBeenCalledWith(responseSecret, ['password']);
@@ -177,7 +177,7 @@ describe('apiLoggingMiddleware', () => {
 
     it('captures body written using res.write', () => {
       const responseChunk = 'response chunk';
-      res.write(responseChunk);
+      (res.write as jest.Mock)(responseChunk);
 
       expect(capturedBody).toBeDefined();
       expect(capturedBody).toBe(responseChunk);
@@ -185,10 +185,33 @@ describe('apiLoggingMiddleware', () => {
 
     it('captures body written using res.end', () => {
       const responseEnd = 'response end';
-      res.end(responseEnd);
+      (res.end as jest.Mock)(responseEnd);
 
       expect(capturedBody).toBeDefined();
       expect(capturedBody).toBe(responseEnd);
+    });
+
+    it('handles multiple chunks written using res.write', () => {
+      const chunk1 = 'first chunk';
+      const chunk2 = 'second chunk';
+
+      (res.write as jest.Mock)(chunk1);
+      (res.write as jest.Mock)(chunk2);
+      finishCallback();
+
+      expect(capturedBody).toBeDefined();
+      expect(capturedBody).toBe(chunk2);
+    });
+
+    it('handles both res.write and res.end calls', () => {
+      const chunk1 = 'first chunk';
+      const endChunk = 'end chunk';
+
+      (res.write as jest.Mock)(chunk1);
+      (res.end as jest.Mock)(endChunk);
+
+      expect(capturedBody).toBeDefined();
+      expect(capturedBody).toBe(endChunk);
     });
   });
 });
