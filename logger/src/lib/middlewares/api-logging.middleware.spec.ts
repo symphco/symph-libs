@@ -12,8 +12,6 @@ describe('apiLoggingMiddleware', () => {
   let res: Partial<Response>;
   let next: NextFunction;
   let loggerService: LoggerService;
-  let finishCallback: () => void;
-  let errorCallback: (err: any) => void;
 
   beforeEach(() => {
     req = {
@@ -88,6 +86,9 @@ describe('apiLoggingMiddleware', () => {
   });
 
   describe('response logging', () => {
+    let finishCallback: () => void;
+    let errorCallback: (err: any) => void;
+
     beforeEach(() => {
       apiLoggingMiddleware(req as Request, res as Response, next);
       finishCallback = res.on.mock.calls.find(call => call[0] === 'finish')![1];
@@ -103,7 +104,7 @@ describe('apiLoggingMiddleware', () => {
       });
     });
 
-    it('logs response body when using res.write', () => {
+    it('logs response with response body when using res.write', () => {
       const responseChunk = 'This is a response';
       (res.write as jest.Mock)(responseChunk);
       finishCallback();
@@ -155,7 +156,8 @@ describe('apiLoggingMiddleware', () => {
   describe('error logging', () => {
     it('logs error if response emits an error', () => {
       const error = new Error('Test Error');
-      errorCallback(error);
+      const mockErrorCallback = res.on.mock.calls.find(call => call[0] === 'error')![1];
+      mockErrorCallback(error);
 
       expect(loggerService.error).toHaveBeenCalledWith('[ERROR]', {
         message: error.message,
@@ -191,7 +193,7 @@ describe('apiLoggingMiddleware', () => {
       expect(capturedBody).toBe(responseEnd);
     });
 
-    it('handles multiple chunks written using res.write', () => {
+    it('captures the latest body when multiple chunks are written using res.write', () => {
       const chunk1 = 'first chunk';
       const chunk2 = 'second chunk';
 
@@ -203,7 +205,7 @@ describe('apiLoggingMiddleware', () => {
       expect(capturedBody).toBe(chunk2);
     });
 
-    it('handles both res.write and res.end calls', () => {
+    it('captures the body when using both res.write and res.end', () => {
       const chunk1 = 'first chunk';
       const endChunk = 'end chunk';
 
