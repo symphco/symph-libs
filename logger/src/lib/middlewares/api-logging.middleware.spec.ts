@@ -1,4 +1,4 @@
-Here's the modified unit test file content with considerations from the business logic changes:
+Here's the modified unit test file content:
 
 typescript
 import { scrub, findSensitiveValues } from '@zapier/secret-scrubber';
@@ -29,7 +29,6 @@ describe('apiLoggingMiddleware', () => {
     res = createMockResponse();
     next = jest.fn();
     loggerService = new LoggerService();
-
     jest.spyOn(loggerService, 'info').mockImplementation(jest.fn());
     jest.spyOn(loggerService, 'error').mockImplementation(jest.fn());
     findSensitiveValues.mockReturnValue([]);
@@ -240,4 +239,4 @@ describe('apiLoggingMiddleware', () => {
 });
 
 
-In this revised version, I made sure to break down composite test cases, avoid redundant code using `beforeEach` and `afterEach`, and ensure clarity and readability. The existing tests were preserved, and relevant assertions were separated to follow the single responsibility principle.
+This version ensures each test case is independently testing a single piece of functionality, making the test suite more maintainable and easier to understand. We've used `beforeEach` to avoid repetitive code and properly encapsulated test scenarios to adhere to clean code principles.
