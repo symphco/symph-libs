@@ -56,7 +56,7 @@ describe('apiLoggingMiddleware', () => {
 
       apiLoggingMiddleware(req as Request, res as Response, next);
 
-      expect(scrub).toHaveBeenCalledWith({ payload: { password: 'secret' } }, ['password']);
+      expect(scrub).toHaveBeenCalledWith({ payload: req.body }, ['password']);
       expect(loggerService.info).toHaveBeenCalledWith('[REQUEST]', {
         method: 'GET',
         path: '/test',
@@ -114,7 +114,6 @@ describe('apiLoggingMiddleware', () => {
     });
 
     it('logs response with updated headers', () => {
-      (findSensitiveValues as jest.Mock).mockReturnValue([]);
       res.getHeaders = jest.fn().mockReturnValue({ 'content-type': 'application/json' });
 
       apiLoggingMiddleware(req as Request, res as Response, next);
@@ -131,10 +130,10 @@ describe('apiLoggingMiddleware', () => {
     it('captures and logs complete response body', () => {
       apiLoggingMiddleware(req as Request, res as Response, next);
 
-      const finishCallback = (res.on as jest.Mock).mock.calls[0][1];
       res.write('This is a response');
       res.end();
 
+      const finishCallback = (res.on as jest.Mock).mock.calls[0][1];
       finishCallback();
 
       expect(loggerService.info).toHaveBeenCalledWith('[RESPONSE]', {
@@ -148,10 +147,10 @@ describe('apiLoggingMiddleware', () => {
       const responseBody = '<html>response</html>';
       apiLoggingMiddleware(req as Request, res as Response, next);
 
-      const finishCallback = (res.on as jest.Mock).mock.calls[0][1];
       res.write(responseBody);
       res.end();
 
+      const finishCallback = (res.on as jest.Mock).mock.calls[0][1];
       finishCallback();
 
       expect(loggerService.info).toHaveBeenCalledWith('[RESPONSE]', {
