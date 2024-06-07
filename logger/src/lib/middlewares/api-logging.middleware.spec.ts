@@ -1,5 +1,3 @@
-Here is the modified unit test file content:
-
 typescript
 import { scrub, findSensitiveValues } from '@zapier/secret-scrubber';
 import { Request, Response, NextFunction } from 'express';
@@ -204,6 +202,3 @@ describe('apiLoggingMiddleware', () => {
     });
   });
 });
-
-
-This modified unit test file is cleaner, more concise, and follows the single responsibility principle. It avoids redundant setup code by using `beforeEach` and splits multi-assertion tests into smaller, single-focus tests for better readability and maintainability.
