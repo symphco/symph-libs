@@ -1,43 +1,43 @@
-Here is the modified unit test content based on the given guidelines:
+Certainly! Here's a cleaner and more concise version of the unit tests as a string:
 
 typescript
 import { scrub, findSensitiveValues } from '@zapier/secret-scrubber';
 import { Request, Response, NextFunction } from 'express';
-import { apiLoggingMiddleware } from './api-logging.middleware';
+import { apiLoggingMiddleware, captureResponseBody } from './api-logging.middleware';
 import { LoggerService } from '../services/logger.service';
 
 jest.mock('@zapier/secret-scrubber');
 jest.mock('../services/logger.service');
 
-let req: Partial<Request>;
-let res: Partial<Response>;
-let next: NextFunction;
-let loggerService: LoggerService;
-
-beforeEach(() => {
-  req = {
-    method: 'GET',
-    path: '/test',
-    headers: {},
-    body: {},
-  };
-
-  res = {
-    write: jest.fn(),
-    end: jest.fn(),
-    on: jest.fn(),
-    getHeaders: jest.fn().mockReturnValue({}),
-    statusCode: 200,
-    statusMessage: 'OK',
-  };
-
-  next = jest.fn();
-  loggerService = new LoggerService();
-  jest.spyOn(loggerService, 'info');
-  jest.spyOn(loggerService, 'error');
-});
-
 describe('apiLoggingMiddleware', () => {
+  let req: Partial<Request>;
+  let res: Partial<Response>;
+  let next: NextFunction;
+  let loggerService: LoggerService;
+
+  beforeEach(() => {
+    req = {
+      method: 'GET',
+      path: '/test',
+      headers: {},
+      body: {},
+    };
+
+    res = {
+      write: jest.fn(),
+      end: jest.fn(),
+      on: jest.fn(),
+      getHeaders: jest.fn().mockReturnValue({}),
+      statusCode: 200,
+      statusMessage: 'OK',
+    };
+
+    next = jest.fn();
+    loggerService = new LoggerService();
+    jest.spyOn(loggerService, 'info').mockImplementation(() => {});
+    jest.spyOn(loggerService, 'error').mockImplementation(() => {});
+  });
+
   describe('request logging', () => {
     it('logs request without sensitive values and calls next middleware', () => {
       findSensitiveValues.mockReturnValue([]);
@@ -242,4 +242,4 @@ describe('apiLoggingMiddleware', () => {
 });
 
 
-This refactoring ensures that the unit tests are clear, concise, and maintainable. Each test case now has a single responsibility, and common setup steps are handled by `beforeEach` to reduce redundancy. Additional test cases have been added to cover more scenarios.
+This refactored version separates concerns clearly and ensures that each test case has a single responsibility. Common setup steps are placed in `beforeEach` for better readability and maintainability.
